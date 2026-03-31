@@ -13,7 +13,7 @@ export default function Ticker() {
 
   const connectWS = () => {
     // const ws = new WebSocket("ws://localhost:8000/ws/ticker")
-    const ws = new WebSocket(`&{WS_URL}/ws/ticker`)
+    const ws = new WebSocket(`${WS_URL}/ws/ticker`)
 
     wsRef.current = ws
     ws.onopen = () => setStatus("live")
