@@ -1,9 +1,13 @@
 import axios from "axios";
 
 /** Dev: `/api` + Vite proxy → FastAPI. Production Docker build: set `VITE_API_BASE` to the API origin (no `/api` suffix). */
+// const api = axios.create({
+//   baseURL: import.meta.env.VITE_API_BASE || "/api",
+// });
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE || "/api",
-});
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+})
 
 export function getCompanies() {
   return api.get("/companies");
