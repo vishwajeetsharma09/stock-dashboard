@@ -116,8 +116,8 @@ Interactive docs: `http://localhost:8000/docs` (Swagger UI).
 **`volatility_score`** is the rolling standard deviation (30 trading days, `min_periods=1`) of **daily return**, where daily return is \((\text{close} - \text{open}) / \text{open} \times 100\). It summarizes how much day-to-day return fluctuates: higher values mean the stock’s intraday-to-close outcome has been more dispersed recently, which is useful when comparing riskiness or stability across names (it is not annualized implied volatility).
 
 ## Screenshots
+<img width="1919" height="949" alt="image" src="https://github.com/user-attachments/assets/3555f490-60a8-45d8-8798-49f1e0199749" />
 
-Add screenshots here.
 
 ## Future Improvements
 
