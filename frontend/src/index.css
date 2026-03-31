@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+/* Smooth ticker scroll */
+/* ADD at the very top of index.css */
+html, body, #root {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ✅ animation only moves content WITHIN its container */
+@keyframes tickerMove {
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
