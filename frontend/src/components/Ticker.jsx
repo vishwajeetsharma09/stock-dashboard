@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react"
 export default function Ticker() {
   const [prices, setPrices] = useState({})
   const [status, setStatus] = useState("connecting")
+  const WS_URL = "wss://stock-dashboard-tfvx.onrender.com"
   const wsRef = useRef(null)
 
   useEffect(() => {
@@ -11,7 +12,9 @@ export default function Ticker() {
   }, [])
 
   const connectWS = () => {
-    const ws = new WebSocket("ws://localhost:8000/ws/ticker")
+    // const ws = new WebSocket("ws://localhost:8000/ws/ticker")
+    const ws = new WebSocket(`&{WS_URL}/ws/ticker`)
+
     wsRef.current = ws
     ws.onopen = () => setStatus("live")
     ws.onmessage = (e) => {
