@@ -124,3 +124,11 @@ Interactive docs: `http://localhost:8000/docs` (Swagger UI).
 - **ML prediction**: supervised models on lagged features for short-horizon direction or range forecasts.  
 - **WebSocket live feed**: push last price and volume during market hours instead of batch Yahoo pulls.  
 - **Docker**: compose already includes DB, API, and static frontend; add CI, health endpoints, and optional nginx for a single host/port.
+
+
+
+
+
+
+
+
