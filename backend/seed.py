@@ -2,6 +2,7 @@
 Standalone seed script — uses a synchronous engine (psycopg2).
 Run from backend/: python seed.py
 """
+
 import os
 import sys
 
@@ -17,56 +18,103 @@ from services.metrics import add_metrics
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 if not DATABASE_URL:
     print("DATABASE_URL is not set", file=sys.stderr)
     sys.exit(1)
 
-SYNC_URL = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+# Render sometimes provides postgres://
+# SQLAlchemy requires postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://",
+        "postgresql://",
+        1
+    )
 
+# Convert async URL -> sync URL for psycopg2
+SYNC_URL = DATABASE_URL.replace(
+    "postgresql+asyncpg://",
+    "postgresql+psycopg2://"
+)
+
+# If DATABASE_URL is already sync
+if SYNC_URL.startswith("postgresql://"):
+    SYNC_URL = SYNC_URL.replace(
+        "postgresql://",
+        "postgresql+psycopg2://",
+        1
+    )
+
+print("Using DB:", SYNC_URL.split("@")[-1])
 
 def main() -> None:
     engine = create_engine(SYNC_URL, future=True)
+
     Base.metadata.create_all(bind=engine)
 
     symbols = list(COMPANY_INFO.keys())
 
     with Session(engine) as session:
+
+        # Insert companies
         for symbol in symbols:
             info = COMPANY_INFO[symbol]
-            existing = session.scalar(select(Company).where(Company.symbol == symbol))
+
+            existing = session.scalar(
+                select(Company).where(Company.symbol == symbol)
+            )
+
             if existing is None:
                 session.add(
-                    Company(symbol=symbol, name=info["name"], sector=info["sector"])
+                    Company(
+                        symbol=symbol,
+                        name=info["name"],
+                        sector=info["sector"]
+                    )
                 )
+
                 session.commit()
                 print(f"[{symbol}] Inserted company row.")
+
             else:
                 print(f"[{symbol}] Company already exists.")
 
+        # Insert stock data
         for symbol in symbols:
+
             print(f"[{symbol}] Fetching yfinance data...")
+
             df = fetch_stock_data(symbol)
+
             if df.empty:
                 print(f"[{symbol}] No data returned, skipping.")
                 continue
+
             df = add_metrics(df)
 
             inserted = 0
             skipped = 0
+
             for _, row in df.iterrows():
+
                 d = row["date"]
+
                 if hasattr(d, "date"):
                     d = d.date()
+
                 dup = session.scalar(
                     select(StockData).where(
                         StockData.symbol == symbol,
                         StockData.date == d,
                     )
                 )
+
                 if dup is not None:
                     skipped += 1
                     continue
+
                 session.add(
                     StockData(
                         symbol=symbol,
@@ -85,9 +133,14 @@ def main() -> None:
                         volatility_score=float(row["volatility_score"]),
                     )
                 )
+
                 inserted += 1
+
             session.commit()
-            print(f"[{symbol}] Inserted {inserted} rows, skipped {skipped} duplicates.")
+
+            print(
+                f"[{symbol}] Inserted {inserted} rows, skipped {skipped} duplicates."
+            )
 
     print("Seeding complete!")
 
